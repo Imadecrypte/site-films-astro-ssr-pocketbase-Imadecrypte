@@ -1,9 +1,22 @@
 ---
+// import { Debug } from "astro:components";
 import { pb } from "../../backend";
+import Layout from "../../layouts/Layout.astro"; 
 
 export const prerender = false;
 
-const personnes = await pb.collection("personnes").getFullList();
+let personnes = [];
+
+try {
+  personnes = await pb.collection("Personnes").getFullList();
+} catch (error) {
+  console.error("Failed to fetch personnes:", error);
+}
 ---
 
-<pre>{JSON.stringify(personnes, null, 2)}</pre>
+<Layout />
+<!-- <pre>
+    {JSON.stringify(personnes, null, 2)}
+</pre> -->
+
+<!-- <Debug {personnes}/> -->
