@@ -1,50 +1,22 @@
 ---
+import { Debug } from "astro:components";
 import Layout from "../../layouts/Layout.astro";
-import type {
-  filmsResponse,
-  personnesResponse,
-  rolesResponse,
-} from "../../pocketbase-typegen";
-
+import LinkFilm from "../../components/LinkFilm.astro";
 export const prerender = false;
 
-type Response = filmsResponse & {
-  expand?: {
-    producteur?: personnesResponse;
-    scenaristes?: personnesResponse[];
-    roles?: (rolesResponse & { expand?: { acteur?: personnesResponse } })[];
-  };
-};
-
-const films = await Astro.locals.pb
-  .collection("films")
-  .getFullList<Response>({ expand: "producteur,scenaristes,roles.acteur" });
+const listFilms = await Astro.locals.pb.collection("films").getFullList();
 ---
 
-<Layout>
-  {films.map((film) => (
-    <div>
-      <h2>Film : {film.titre}</h2>
-      <p>Année de sortie : {film.date_sortie}</p>
-
-      <p>Producteur : {film.expand?.producteur?.nom || "Non renseigné"}</p>
-
-      <p>
-        Scénaristes :
-        {film.expand?.scenaristes?.length
-          ? film.expand.scenaristes.map((s) => s.nom).join(", ")
-          : "Non renseigné"}
-      </p>
-
-      <p>Rôles :</p>
-      <ul>
-        {film.expand?.roles?.map((r) => (
-          <li>
-            <strong>{r.nom_role}</strong> joué par{" "}
-            {r.expand?.acteur?.nom || "Non renseigné"}
-          </li>
-        ))}
-      </ul>
-    </div>
-  ))}
+<Layout pageTitle="Liste des personnes">
+  <ul>
+    {
+      listFilms.map((film) => (
+        <li>
+          <LinkFilm {...film} />
+        </li>
+      ))
+    }
+  </ul>
+  <!-- <Debug {listFilms} /> -->
+   <a href="/films/edit">Ajouter un film</a>
 </Layout>
